@@ -66,11 +66,11 @@ export function recordUser(
        updated_at = excluded.updated_at`
   ).run(chatId, userId, username, firstName, now, now);
 
-  const row = db.prepare("SELECT * FROM users WHERE chat_id = ?").get(chatId) as UserRow;
+  const row = db.prepare("SELECT * FROM users WHERE chat_id = ?").get(chatId) as unknown as UserRow;
   return rowToUser(row);
 }
 
 export function listUsers(): User[] {
-  const rows = db.prepare("SELECT * FROM users ORDER BY created_at DESC").all() as UserRow[];
+  const rows = db.prepare("SELECT * FROM users ORDER BY created_at DESC").all() as unknown as UserRow[];
   return rows.map(rowToUser);
 }
