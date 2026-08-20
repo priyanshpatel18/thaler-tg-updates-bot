@@ -1,12 +1,12 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { config } from "./config.js";
 
 mkdirSync(dirname(config.storage.dbPath), { recursive: true });
 
-const db = new Database(config.storage.dbPath);
-db.pragma("journal_mode = WAL");
+const db = new DatabaseSync(config.storage.dbPath);
+db.exec("PRAGMA journal_mode = WAL;");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
