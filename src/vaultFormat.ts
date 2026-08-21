@@ -38,7 +38,7 @@ function fmtPct(bps: number): string {
 }
 
 export function formatVaultHeader(vault: Vault): string {
-  return `Vault \`${shortAddress(vault.execution.walletAddress)}\` (${capitalize(vault.execution.tier)})`;
+  return `Vault \`${vault.execution.walletAddress}\` (${capitalize(vault.execution.tier)})`;
 }
 
 export function formatVaultData(vault: Vault, solPriceUsd: number): string {
