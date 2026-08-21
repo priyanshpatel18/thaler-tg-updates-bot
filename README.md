@@ -1,6 +1,6 @@
 # Thaler Vault Bot
 
-A small Telegram bot with seven jobs:
+A small Telegram bot with eight jobs:
 
 1. When someone sends `/start`, register them and reply with a welcome message and the command list.
 2. Save their Telegram chat id and user id to a local SQLite DB.
@@ -9,6 +9,7 @@ A small Telegram bot with seven jobs:
 5. Push a portfolio summary (SOL price, TVL, total uPnL, realized profit, ROI, average LTV) to every registered user every `THALER_PORTFOLIO_INTERVAL_MS`.
 6. Let any registered user send `/vaults` to get a list of active vaults (risk tier and SOL managed) and tap one to see its full data on demand, or `/portfolio` to get the portfolio summary instantly.
 7. Let any registered user send `/help` to see the full command list.
+8. Let a Share button on the vault detail message or the portfolio summary generate a branded PnL card image and send it back as a photo.
 
 ## Setup
 
@@ -59,15 +60,20 @@ https://your-service.up.railway.app/users?key=YOUR_API_SECRET_KEY
 ## Files
 
 - `src/db.ts`, the SQLite tables (users, vault snapshots) and read/write functions.
-- `src/telegramBot.ts`, listens for `/start` and `/vaults`, and handles the vault-picker button taps.
-- `src/telegram.ts`, sends messages (with optional inline keyboards) and answers callback queries.
+- `src/telegramBot.ts`, listens for commands and button taps.
+- `src/telegram.ts`, sends messages and photos, answers callback queries, registers the command menu.
 - `src/server.ts`, the admin API.
 - `src/thalerApi.ts`, calls the Thaler wallet-vaults endpoint.
 - `src/solPrice.ts`, reads the live SOL price from a MagicBlock account.
 - `src/vaultFormat.ts`, shared formatting for a single vault's data readout.
 - `src/vaultWatcher.ts`, polls the wallet's vaults and pings users on lifecycle changes.
 - `src/portfolioSummary.ts`, pushes the portfolio summary on a schedule.
+- `src/shareCard.ts`, renders the branded PnL share card image.
 - `src/notify.ts`, sends a message to every registered user.
 - `src/config.ts`, env vars.
 - `src/logger.ts`, logging.
 - `src/index.ts`, starts everything.
+
+## Share card assets
+
+`assets/fonts/`, `assets/shareable-cards/`, and `assets/qr-thaler.png` are ported from the Thaler web app's share-card feature. They need to ship with the deployed app (not just `dist/`), since `src/shareCard.ts` reads them from disk at runtime.

@@ -44,6 +44,22 @@ export async function answerCallbackQuery(callbackQueryId: string): Promise<void
   }
 }
 
+export async function sendPhoto(chatId: string, photo: Buffer, caption?: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${config.telegram.botToken}/sendPhoto`;
+
+  const form = new FormData();
+  form.set("chat_id", chatId);
+  if (caption) form.set("caption", caption);
+  form.set("photo", new Blob([photo], { type: "image/png" }), "share.png");
+
+  const res = await fetch(url, { method: "POST", body: form });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Telegram sendPhoto to ${chatId} failed: ${res.status} ${errBody}`);
+  }
+}
+
 export async function setMyCommands(commands: BotCommand[]): Promise<void> {
   const url = `https://api.telegram.org/bot${config.telegram.botToken}/setMyCommands`;
 

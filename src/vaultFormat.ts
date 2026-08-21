@@ -24,6 +24,19 @@ export function equitySol(vault: Vault): number {
   return Number(vault.execution.equityLamports ?? 0) / 1e9;
 }
 
+export function realizedProfitSol(vault: Vault): number {
+  return Number(vault.state?.positions?.realizedYieldLamports ?? 0) / 1e9;
+}
+
+export function roiPct(vault: Vault): number {
+  const equity = equitySol(vault);
+  return equity > 0 ? (realizedProfitSol(vault) / equity) * 100 : 0;
+}
+
+export function daysHeld(vault: Vault): number {
+  return vault.state?.positions?.daysHeld ?? 0;
+}
+
 function fmtUsd(n: number): string {
   return `$${n.toFixed(2)}`;
 }

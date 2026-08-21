@@ -2,7 +2,7 @@ import { config } from "./config.js";
 import { logger } from "./logger.js";
 import { notifyAll } from "./notify.js";
 import { getSolPriceUsd } from "./solPrice.js";
-import { equitySol, isActiveVault } from "./vaultFormat.js";
+import { equitySol, isActiveVault, realizedProfitSol as vaultRealizedProfitSol } from "./vaultFormat.js";
 import { getWalletVaults, type Vault } from "./thalerApi.js";
 
 interface PortfolioAggregate {
@@ -14,7 +14,7 @@ interface PortfolioAggregate {
   roiPct: number;
 }
 
-function computeAggregate(vaults: Vault[]): PortfolioAggregate {
+export function computeAggregate(vaults: Vault[]): PortfolioAggregate {
   const active = vaults.filter(isActiveVault);
 
   let tvlSol = 0;
@@ -30,7 +30,7 @@ function computeAggregate(vaults: Vault[]): PortfolioAggregate {
 
     tvlSol += equitySol(vault);
     totalUPnlUsd += fast?.unrealizedPnlUsd ?? 0;
-    realizedProfitSol += Number(positionsState?.realizedYieldLamports ?? 0) / 1e9;
+    realizedProfitSol += vaultRealizedProfitSol(vault);
 
     if (kaminoMultiply) {
       ltvBpsSum += kaminoMultiply.ltvBps;

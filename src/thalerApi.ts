@@ -34,6 +34,7 @@ export interface Vault {
     positions?: {
       claimableSol: number;
       realizedYieldLamports: number | string;
+      daysHeld: number;
       positions: {
         kaminoMultiply?: {
           ltvBps: number;
