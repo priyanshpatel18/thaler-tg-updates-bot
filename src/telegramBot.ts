@@ -3,6 +3,7 @@ import { logger } from "./logger.js";
 import { recordUser } from "./db.js";
 import { answerCallbackQuery, sendDirectMessage, sendPhoto, setMyCommands, type InlineKeyboard } from "./telegram.js";
 import { getWalletVaults } from "./thalerApi.js";
+import { getSolPriceUsd } from "./solPrice.js";
 import {
   capitalize,
   daysHeld,
@@ -99,7 +100,7 @@ async function handlePortfolioCommand(chatId: string): Promise<void> {
 }
 
 async function handleVaultCallback(chatId: string, callbackQueryId: string, vaultId: string): Promise<void> {
-  const response = await getWalletVaults(config.thaler.walletAddress);
+  const [response, solPriceUsd] = await Promise.all([getWalletVaults(config.thaler.walletAddress), getSolPriceUsd()]);
   const vault = response.vaults.find((v) => v.execution.id === vaultId);
 
   await answerCallbackQuery(callbackQueryId);
@@ -112,7 +113,7 @@ async function handleVaultCallback(chatId: string, callbackQueryId: string, vaul
   const keyboard: InlineKeyboard = {
     inline_keyboard: [[{ text: "Share", callback_data: `share:vault:${vault.execution.id}` }]],
   };
-  await sendDirectMessage(chatId, formatVaultBlock(vault), keyboard);
+  await sendDirectMessage(chatId, formatVaultBlock(vault, solPriceUsd), keyboard);
 }
 
 async function handleShareVaultCallback(chatId: string, callbackQueryId: string, vaultId: string): Promise<void> {

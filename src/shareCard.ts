@@ -14,7 +14,7 @@ const TIER_COLORS: Record<string, string> = {
 const TIER_IMAGE: Record<string, string> = {
   safe: "Safe.jpg",
   conservative: "Conservative.jpg",
-  balanced: "General.jpg",
+  balanced: "Balanced.jpg",
   optimistic: "Optimistic.jpg",
   aggressive: "Aggressive.jpg",
   yolo: "YOLO.jpg",
@@ -37,7 +37,7 @@ const bold = readFileSync("assets/fonts/NexaBold.woff");
 const light = readFileSync("assets/fonts/NexaLight.woff");
 const qrDataUri = toDataUri(readFileSync("assets/qr-thaler.png"), "image/png");
 const bgDataUris = Object.fromEntries(
-  ["Safe.jpg", "Conservative.jpg", "General.jpg", "Optimistic.jpg", "Aggressive.jpg", "YOLO.jpg"].map((file) => [
+  ["Safe.jpg", "Conservative.jpg", "Balanced.jpg", "General.jpg", "Optimistic.jpg", "Aggressive.jpg", "YOLO.jpg"].map((file) => [
     file,
     toDataUri(readFileSync(`assets/shareable-cards/${file}`), "image/jpeg"),
   ])

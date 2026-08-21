@@ -2,6 +2,7 @@ import { config } from "./config.js";
 import { logger } from "./logger.js";
 import { getVaultSnapshot, hasAnyVaultSnapshot, setVaultSnapshot } from "./db.js";
 import { notifyAll } from "./notify.js";
+import { getSolPriceUsd } from "./solPrice.js";
 import { formatVaultData, formatVaultHeader } from "./vaultFormat.js";
 import { getWalletVaults, type Vault } from "./thalerApi.js";
 
@@ -52,13 +53,13 @@ function changeSummary(prev: LifecycleSnapshot, next: LifecycleSnapshot): string
   return changes;
 }
 
-function formatChangeMessage(vault: Vault, changes: string[]): string {
+function formatChangeMessage(vault: Vault, changes: string[], solPriceUsd: number): string {
   const header = `${formatVaultHeader(vault)} — ${changes.join(", ")}`;
-  return `${header}\n\n${formatVaultData(vault)}`;
+  return `${header}\n\n${formatVaultData(vault, solPriceUsd)}`;
 }
 
 async function tick(): Promise<void> {
-  const response = await getWalletVaults(config.thaler.walletAddress);
+  const [response, solPriceUsd] = await Promise.all([getWalletVaults(config.thaler.walletAddress), getSolPriceUsd()]);
   const isBaseline = !hasAnyVaultSnapshot();
 
   for (const vault of response.vaults) {
@@ -69,7 +70,7 @@ async function tick(): Promise<void> {
     if (prev && !isBaseline) {
       const changes = changeSummary(prev, next);
       if (changes.length > 0) {
-        const message = formatChangeMessage(vault, changes);
+        const message = formatChangeMessage(vault, changes, solPriceUsd);
         logger.info(`Vault change detected: ${vaultId} — ${changes.join(", ")}`);
         await notifyAll(message);
       }
