@@ -26,9 +26,6 @@ export function createServer() {
 
   app.use(requireApiKey);
 
-  // Admin view: everyone who has ever /start'd the bot, with their chat id + Telegram user id.
-  // CLI: curl -H "Authorization: Bearer <key>" https://.../users
-  // Browser: https://.../users?key=<key>
   app.get("/users", (_req, res) => {
     res.json({ users: listUsers() });
   });

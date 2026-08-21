@@ -1,18 +1,20 @@
 # Thaler Vault Bot
 
-A small Telegram bot with three jobs:
+A small Telegram bot with six jobs:
 
 1. When someone sends `/start`, reply with `Welcome to Thaler Vault Updates`.
 2. Save their Telegram chat id and user id to a local SQLite DB.
 3. Let an admin view that list through a secured API endpoint.
-
-Nothing else. No price feed, no positions, no subscriptions, no payments.
+4. Poll one wallet's vaults on the Thaler API every `THALER_POLL_INTERVAL_MS`. When a vault's lifecycle changes (open/close/claim/dismantle, position status, or funds becoming claimable), ping every registered user with that vault's full data.
+5. Push a portfolio summary (SOL price, TVL, total uPnL, realized profit, ROI, average LTV) to every registered user every `THALER_PORTFOLIO_INTERVAL_MS`.
+6. Let any registered user send `/vaults` to get a list of active vaults (risk tier and SOL managed) and tap one to see its full data on demand.
 
 ## Setup
 
 1. Message [@BotFather](https://t.me/BotFather) on Telegram, run `/newbot`, and copy the token it gives you. That's `TELEGRAM_BOT_TOKEN`.
 2. Generate a random secret, for example `openssl rand -hex 32`. That's `API_SECRET_KEY`.
-3. Copy `.env.example` to `.env` and fill in both values.
+3. Get a Thaler API key (`THALER_API_KEY`) and pick the wallet address to watch (`THALER_WALLET_ADDRESS`).
+4. Copy `.env.example` to `.env` and fill in the values.
 
 ## Commands to run
 
@@ -55,14 +57,16 @@ https://your-service.up.railway.app/users?key=YOUR_API_SECRET_KEY
 
 ## Files
 
-- `src/db.ts`, the SQLite table and read/write functions.
-- `src/telegramBot.ts`, listens for `/start`.
-- `src/telegram.ts`, sends messages.
+- `src/db.ts`, the SQLite tables (users, vault snapshots) and read/write functions.
+- `src/telegramBot.ts`, listens for `/start` and `/vaults`, and handles the vault-picker button taps.
+- `src/telegram.ts`, sends messages (with optional inline keyboards) and answers callback queries.
 - `src/server.ts`, the admin API.
+- `src/thalerApi.ts`, calls the Thaler wallet-vaults endpoint.
+- `src/solPrice.ts`, reads the live SOL price from a MagicBlock account.
+- `src/vaultFormat.ts`, shared formatting for a single vault's data readout.
+- `src/vaultWatcher.ts`, polls the wallet's vaults and pings users on lifecycle changes.
+- `src/portfolioSummary.ts`, pushes the portfolio summary on a schedule.
+- `src/notify.ts`, sends a message to every registered user.
 - `src/config.ts`, env vars.
 - `src/logger.ts`, logging.
 - `src/index.ts`, starts everything.
-
-## Note
-
-The API key check is a plain string compare. Fine for an internal admin tool, not meant for public exposure.

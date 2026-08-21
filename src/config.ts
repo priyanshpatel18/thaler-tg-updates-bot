@@ -23,9 +23,15 @@ export const config = {
     botToken: requireEnv("TELEGRAM_BOT_TOKEN"),
   },
   api: {
-    // Required on every admin request to the HTTP API (Authorization: Bearer <secretKey>, or ?key=).
     secretKey: requireEnv("API_SECRET_KEY"),
     port: optionalNumber("PORT", 3000),
+  },
+  thaler: {
+    baseUrl: requireEnv("THALER_API_BASE_URL"),
+    apiKey: requireEnv("THALER_API_KEY"),
+    walletAddress: requireEnv("THALER_WALLET_ADDRESS"),
+    pollIntervalMs: optionalNumber("THALER_POLL_INTERVAL_MS", 5 * 60 * 1000),
+    portfolioIntervalMs: optionalNumber("THALER_PORTFOLIO_INTERVAL_MS", 60 * 60 * 1000),
   },
   storage: {
     dbPath: process.env.DB_PATH ?? "./data/users.db",

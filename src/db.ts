@@ -19,6 +19,14 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS vault_snapshots (
+    vault_id TEXT PRIMARY KEY,
+    snapshot_json TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+`);
+
 export interface User {
   chatId: string;
   userId: string;
@@ -48,7 +56,6 @@ function rowToUser(row: UserRow): User {
   };
 }
 
-/** Called on every /start. Inserts on first contact, refreshes username/first_name on repeat visits. */
 export function recordUser(
   chatId: string,
   userId: string,
@@ -73,4 +80,27 @@ export function recordUser(
 export function listUsers(): User[] {
   const rows = db.prepare("SELECT * FROM users ORDER BY created_at DESC").all() as unknown as UserRow[];
   return rows.map(rowToUser);
+}
+
+export function hasAnyVaultSnapshot(): boolean {
+  const row = db.prepare("SELECT 1 FROM vault_snapshots LIMIT 1").get();
+  return row !== undefined;
+}
+
+export function getVaultSnapshot<T>(vaultId: string): T | null {
+  const row = db.prepare("SELECT snapshot_json FROM vault_snapshots WHERE vault_id = ?").get(vaultId) as
+    | { snapshot_json: string }
+    | undefined;
+  return row ? (JSON.parse(row.snapshot_json) as T) : null;
+}
+
+export function setVaultSnapshot(vaultId: string, snapshot: unknown): void {
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO vault_snapshots (vault_id, snapshot_json, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(vault_id) DO UPDATE SET
+       snapshot_json = excluded.snapshot_json,
+       updated_at = excluded.updated_at`
+  ).run(vaultId, JSON.stringify(snapshot), now);
 }
