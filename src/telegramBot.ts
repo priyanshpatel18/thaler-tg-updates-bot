@@ -1,6 +1,6 @@
 import { config } from "./config.js";
 import { logger } from "./logger.js";
-import { recordUser } from "./db.js";
+import { recordUser, removeUser } from "./db.js";
 import { answerCallbackQuery, sendDirectMessage, sendPhoto, setMyCommands, type InlineKeyboard } from "./telegram.js";
 import { getWalletVaults } from "./thalerApi.js";
 import { getSolPriceUsd } from "./solPrice.js";
@@ -19,6 +19,7 @@ import { renderShareCard } from "./shareCard.js";
 
 const COMMANDS = [
   { command: "start", description: "register for updates" },
+  { command: "stop", description: "unsubscribe from updates" },
   { command: "vaults", description: "list active vaults and view one" },
   { command: "portfolio", description: "get the portfolio summary now" },
   { command: "help", description: "show this list" },
@@ -67,6 +68,16 @@ async function handleStart(chatId: string, userId: string, username: string | nu
   logger.info(`New /start — chatId=${user.chatId} userId=${user.userId} username=${user.username ?? "-"}`);
 
   await sendDirectMessage(chatId, `Welcome to Thaler Vault Updates\n\n${HELP_TEXT}`);
+}
+
+async function handleStop(chatId: string): Promise<void> {
+  const removed = removeUser(chatId);
+  logger.info(`/stop — chatId=${chatId} removed=${removed}`);
+
+  await sendDirectMessage(
+    chatId,
+    removed ? "You've been unsubscribed. Send /start to subscribe again." : "You're not subscribed."
+  );
 }
 
 async function handleVaultsCommand(chatId: string): Promise<void> {
@@ -218,6 +229,12 @@ async function pollLoop(): Promise<void> {
           await handleStart(chatId, userId, username, firstName);
         } catch (err) {
           logger.error("Failed to handle /start", { err, chatId });
+        }
+      } else if (text.startsWith("/stop")) {
+        try {
+          await handleStop(chatId);
+        } catch (err) {
+          logger.error("Failed to handle /stop", { err, chatId });
         }
       } else if (text.startsWith("/vaults")) {
         try {

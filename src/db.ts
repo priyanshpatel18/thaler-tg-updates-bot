@@ -82,6 +82,11 @@ export function listUsers(): User[] {
   return rows.map(rowToUser);
 }
 
+export function removeUser(chatId: string): boolean {
+  const result = db.prepare("DELETE FROM users WHERE chat_id = ?").run(chatId);
+  return result.changes > 0;
+}
+
 export function hasAnyVaultSnapshot(): boolean {
   const row = db.prepare("SELECT 1 FROM vault_snapshots LIMIT 1").get();
   return row !== undefined;

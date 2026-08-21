@@ -42,15 +42,13 @@ export function formatVaultHeader(vault: Vault): string {
 }
 
 export function formatVaultData(vault: Vault, solPriceUsd: number): string {
-  const fast = vault.state?.fast;
   const kaminoMultiply = vault.state?.positions?.positions.kaminoMultiply;
 
   return [
     `SOL Price: ${fmtUsd(solPriceUsd)}`,
     `Value: ${equitySol(vault).toFixed(4)} SOL`,
-    `uPnL: ${fast ? fmtUsd(fast.unrealizedPnlUsd) : "-"}`,
-    `Realized Profit: ${realizedProfitSol(vault).toFixed(4)} SOL`,
-    `ROI: ${roiPct(vault).toFixed(2)}%`,
+    `Realized Profit (since last claim): ${realizedProfitSol(vault).toFixed(4)} SOL`,
+    `ROI (since last claim): ${roiPct(vault).toFixed(2)}%`,
     `LTV: ${kaminoMultiply ? fmtPct(kaminoMultiply.ltvBps) : "-"}`,
   ].join("\n");
 }

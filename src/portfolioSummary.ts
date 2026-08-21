@@ -8,7 +8,6 @@ import { getWalletVaults, type Vault } from "./thalerApi.js";
 interface PortfolioAggregate {
   activeCount: number;
   tvlSol: number;
-  totalUPnlUsd: number;
   realizedProfitSol: number;
   avgLtvPct: number;
   roiPct: number;
@@ -18,18 +17,14 @@ export function computeAggregate(vaults: Vault[]): PortfolioAggregate {
   const active = vaults.filter(isActiveVault);
 
   let tvlSol = 0;
-  let totalUPnlUsd = 0;
   let realizedProfitSol = 0;
   let ltvBpsSum = 0;
   let ltvCount = 0;
 
   for (const vault of active) {
-    const fast = vault.state?.fast;
-    const positionsState = vault.state?.positions;
-    const kaminoMultiply = positionsState?.positions.kaminoMultiply;
+    const kaminoMultiply = vault.state?.positions?.positions.kaminoMultiply;
 
     tvlSol += equitySol(vault);
-    totalUPnlUsd += fast?.unrealizedPnlUsd ?? 0;
     realizedProfitSol += vaultRealizedProfitSol(vault);
 
     if (kaminoMultiply) {
@@ -41,7 +36,6 @@ export function computeAggregate(vaults: Vault[]): PortfolioAggregate {
   return {
     activeCount: active.length,
     tvlSol,
-    totalUPnlUsd,
     realizedProfitSol,
     avgLtvPct: ltvCount > 0 ? ltvBpsSum / ltvCount / 100 : 0,
     roiPct: tvlSol > 0 ? (realizedProfitSol / tvlSol) * 100 : 0,
@@ -54,9 +48,8 @@ function formatSummary(agg: PortfolioAggregate, solPriceUsd: number): string {
     ``,
     `SOL Price: $${solPriceUsd.toFixed(2)}`,
     `TVL: ${agg.tvlSol.toFixed(4)} SOL`,
-    `Total uPnL: $${agg.totalUPnlUsd.toFixed(2)}`,
-    `Realized Profit: ${agg.realizedProfitSol.toFixed(4)} SOL`,
-    `ROI: ${agg.roiPct.toFixed(2)}%`,
+    `Realized Profit (since last claim): ${agg.realizedProfitSol.toFixed(4)} SOL`,
+    `ROI (since last claim): ${agg.roiPct.toFixed(2)}%`,
     `Avg LTV: ${agg.avgLtvPct.toFixed(2)}%`,
   ].join("\n");
 }
