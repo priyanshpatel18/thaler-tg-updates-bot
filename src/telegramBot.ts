@@ -3,7 +3,7 @@ import { logger } from "./logger.js";
 import { recordUser } from "./db.js";
 import { answerCallbackQuery, sendDirectMessage, setMyCommands, type InlineKeyboard } from "./telegram.js";
 import { getWalletVaults } from "./thalerApi.js";
-import { equitySol, formatVaultBlock, isActiveVault, shortId } from "./vaultFormat.js";
+import { capitalize, equitySol, formatVaultBlock, isActiveVault, shortAddress } from "./vaultFormat.js";
 import { buildPortfolioSummaryMessage } from "./portfolioSummary.js";
 
 const COMMANDS = [
@@ -70,7 +70,7 @@ async function handleVaultsCommand(chatId: string): Promise<void> {
   const keyboard: InlineKeyboard = {
     inline_keyboard: active.map((vault) => [
       {
-        text: `${vault.execution.tier} — ${equitySol(vault).toFixed(2)} SOL (${shortId(vault.execution.id)})`,
+        text: `${shortAddress(vault.execution.walletAddress)} — ${equitySol(vault).toFixed(2)} SOL (${capitalize(vault.execution.tier)})`,
         callback_data: `vault:${vault.execution.id}`,
       },
     ]),

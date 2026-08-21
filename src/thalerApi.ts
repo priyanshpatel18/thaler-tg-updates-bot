@@ -3,6 +3,7 @@ import { config } from "./config.js";
 export interface VaultExecution {
   id: string;
   tier: string;
+  walletAddress: string;
   equityLamports: number | string;
   openState: string | null;
   closeState: string | null;

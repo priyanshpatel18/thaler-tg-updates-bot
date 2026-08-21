@@ -8,6 +8,14 @@ export function shortId(vaultId: string): string {
   return vaultId.slice(0, 8);
 }
 
+export function shortAddress(address: string): string {
+  return `${address.slice(0, 5)}...${address.slice(-5)}`;
+}
+
+export function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export function netValueSol(vault: Vault): number {
   return Number(vault.quantSeriesLatest?.netValueSolLamports ?? 0) / 1e9;
 }
@@ -29,7 +37,7 @@ function fmtLeverage(n: number): string {
 }
 
 export function formatVaultHeader(vault: Vault): string {
-  return `Vault \`${shortId(vault.execution.id)}\` (${vault.execution.tier})`;
+  return `Vault \`${shortId(vault.execution.id)}\` (${capitalize(vault.execution.tier)})`;
 }
 
 export function formatVaultData(vault: Vault): string {
@@ -47,7 +55,7 @@ export function formatVaultData(vault: Vault): string {
     `Lev: ${leverage !== undefined ? fmtLeverage(leverage) : "-"}`,
     `LTV: ${kaminoMultiply ? fmtPct(kaminoMultiply.ltvBps) : "-"}`,
     `Net Carry APR: ${vault.quantSeriesLatest ? fmtPct(vault.quantSeriesLatest.netCarryApyBps) : "-"}`,
-    `Risk Profile: ${vault.execution.tier}`,
+    `Risk Profile: ${capitalize(vault.execution.tier)}`,
     `Short Entry: ${fast ? fmtUsd(fast.perpEntryPrice) : "-"}`,
     `Short: ${fast ? fmtUsd(fast.shortNotionalUsd) : "-"}`,
     `Funding: ${fmtUsd(fundingUsd)}`,
