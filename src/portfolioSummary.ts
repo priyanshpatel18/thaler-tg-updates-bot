@@ -44,7 +44,6 @@ function computeAggregate(vaults: Vault[]): PortfolioAggregate {
     totalUPnlUsd,
     realizedProfitSol,
     avgLtvPct: ltvCount > 0 ? ltvBpsSum / ltvCount / 100 : 0,
-    // Vaults are delta-neutral, so uPnL is basis noise, not return. ROI is realized profit only.
     roiPct: tvlSol > 0 ? (realizedProfitSol / tvlSol) * 100 : 0,
   };
 }
@@ -62,10 +61,14 @@ function formatSummary(agg: PortfolioAggregate, solPriceUsd: number): string {
   ].join("\n");
 }
 
-async function tick(): Promise<void> {
+export async function buildPortfolioSummaryMessage(): Promise<string> {
   const [response, solPriceUsd] = await Promise.all([getWalletVaults(config.thaler.walletAddress), getSolPriceUsd()]);
   const aggregate = computeAggregate(response.vaults);
-  await notifyAll(formatSummary(aggregate, solPriceUsd));
+  return formatSummary(aggregate, solPriceUsd);
+}
+
+async function tick(): Promise<void> {
+  await notifyAll(await buildPortfolioSummaryMessage());
 }
 
 export function startPortfolioSummary(): void {

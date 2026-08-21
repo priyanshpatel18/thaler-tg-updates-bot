@@ -1,7 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 
-// Same feed account and decode logic as FRONTIER/magicblock/realtime-price-tracker,
-// but polled on-demand here instead of subscribed to over a websocket.
 const connection = new Connection("https://devnet.magicblock.app");
 const PRICE_ACCOUNT = new PublicKey("ENYwebBThHzmzwPLAQvCucUTsjyfBSZdD9ViXksS4jPu");
 

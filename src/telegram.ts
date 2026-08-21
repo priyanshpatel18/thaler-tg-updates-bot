@@ -4,6 +4,11 @@ export interface InlineKeyboard {
   inline_keyboard: { text: string; callback_data: string }[][];
 }
 
+export interface BotCommand {
+  command: string;
+  description: string;
+}
+
 export async function sendDirectMessage(chatId: string, text: string, replyMarkup?: InlineKeyboard): Promise<void> {
   const url = `https://api.telegram.org/bot${config.telegram.botToken}/sendMessage`;
 
@@ -24,7 +29,6 @@ export async function sendDirectMessage(chatId: string, text: string, replyMarku
   }
 }
 
-/** Dismisses the loading spinner on an inline keyboard button after it's been handled. */
 export async function answerCallbackQuery(callbackQueryId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${config.telegram.botToken}/answerCallbackQuery`;
 
@@ -37,5 +41,20 @@ export async function answerCallbackQuery(callbackQueryId: string): Promise<void
   if (!res.ok) {
     const errBody = await res.text();
     throw new Error(`Telegram answerCallbackQuery failed: ${res.status} ${errBody}`);
+  }
+}
+
+export async function setMyCommands(commands: BotCommand[]): Promise<void> {
+  const url = `https://api.telegram.org/bot${config.telegram.botToken}/setMyCommands`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ commands }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Telegram setMyCommands failed: ${res.status} ${errBody}`);
   }
 }

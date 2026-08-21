@@ -1,13 +1,14 @@
 # Thaler Vault Bot
 
-A small Telegram bot with six jobs:
+A small Telegram bot with seven jobs:
 
-1. When someone sends `/start`, reply with `Welcome to Thaler Vault Updates`.
+1. When someone sends `/start`, register them and reply with a welcome message and the command list.
 2. Save their Telegram chat id and user id to a local SQLite DB.
 3. Let an admin view that list through a secured API endpoint.
 4. Poll one wallet's vaults on the Thaler API every `THALER_POLL_INTERVAL_MS`. When a vault's lifecycle changes (open/close/claim/dismantle, position status, or funds becoming claimable), ping every registered user with that vault's full data.
 5. Push a portfolio summary (SOL price, TVL, total uPnL, realized profit, ROI, average LTV) to every registered user every `THALER_PORTFOLIO_INTERVAL_MS`.
-6. Let any registered user send `/vaults` to get a list of active vaults (risk tier and SOL managed) and tap one to see its full data on demand.
+6. Let any registered user send `/vaults` to get a list of active vaults (risk tier and SOL managed) and tap one to see its full data on demand, or `/portfolio` to get the portfolio summary instantly.
+7. Let any registered user send `/help` to see the full command list.
 
 ## Setup
 

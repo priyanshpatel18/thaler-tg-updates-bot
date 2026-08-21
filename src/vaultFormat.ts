@@ -12,7 +12,6 @@ export function netValueSol(vault: Vault): number {
   return Number(vault.quantSeriesLatest?.netValueSolLamports ?? 0) / 1e9;
 }
 
-/** Deposited principal (TVL contribution), not the mark-to-market value. */
 export function equitySol(vault: Vault): number {
   return Number(vault.execution.equityLamports ?? 0) / 1e9;
 }

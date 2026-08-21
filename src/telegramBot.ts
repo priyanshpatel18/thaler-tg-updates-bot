@@ -1,9 +1,19 @@
 import { config } from "./config.js";
 import { logger } from "./logger.js";
 import { recordUser } from "./db.js";
-import { answerCallbackQuery, sendDirectMessage, type InlineKeyboard } from "./telegram.js";
+import { answerCallbackQuery, sendDirectMessage, setMyCommands, type InlineKeyboard } from "./telegram.js";
 import { getWalletVaults } from "./thalerApi.js";
 import { equitySol, formatVaultBlock, isActiveVault, shortId } from "./vaultFormat.js";
+import { buildPortfolioSummaryMessage } from "./portfolioSummary.js";
+
+const COMMANDS = [
+  { command: "start", description: "register for updates" },
+  { command: "vaults", description: "list active vaults and view one" },
+  { command: "portfolio", description: "get the portfolio summary now" },
+  { command: "help", description: "show this list" },
+];
+
+const HELP_TEXT = ["Available commands:", ...COMMANDS.map((c) => `/${c.command} - ${c.description}`)].join("\n");
 
 interface TelegramUpdate {
   update_id: number;
@@ -45,7 +55,7 @@ async function handleStart(chatId: string, userId: string, username: string | nu
   const user = recordUser(chatId, userId, username, firstName);
   logger.info(`New /start — chatId=${user.chatId} userId=${user.userId} username=${user.username ?? "-"}`);
 
-  await sendDirectMessage(chatId, "Welcome to Thaler Vault Updates");
+  await sendDirectMessage(chatId, `Welcome to Thaler Vault Updates\n\n${HELP_TEXT}`);
 }
 
 async function handleVaultsCommand(chatId: string): Promise<void> {
@@ -67,6 +77,14 @@ async function handleVaultsCommand(chatId: string): Promise<void> {
   };
 
   await sendDirectMessage(chatId, "Select a vault:", keyboard);
+}
+
+async function handleHelpCommand(chatId: string): Promise<void> {
+  await sendDirectMessage(chatId, HELP_TEXT);
+}
+
+async function handlePortfolioCommand(chatId: string): Promise<void> {
+  await sendDirectMessage(chatId, await buildPortfolioSummaryMessage());
 }
 
 async function handleVaultCallback(chatId: string, callbackQueryId: string, vaultId: string): Promise<void> {
@@ -132,11 +150,24 @@ async function pollLoop(): Promise<void> {
         } catch (err) {
           logger.error("Failed to handle /vaults", { err, chatId });
         }
+      } else if (text.startsWith("/portfolio")) {
+        try {
+          await handlePortfolioCommand(chatId);
+        } catch (err) {
+          logger.error("Failed to handle /portfolio", { err, chatId });
+        }
+      } else if (text.startsWith("/help")) {
+        try {
+          await handleHelpCommand(chatId);
+        } catch (err) {
+          logger.error("Failed to handle /help", { err, chatId });
+        }
       }
     }
   }
 }
 
 export function startTelegramBot(): void {
+  setMyCommands(COMMANDS).catch((err) => logger.error("Failed to register bot commands", { err }));
   pollLoop().catch((err) => logger.error("Telegram poll loop crashed", { err }));
 }
